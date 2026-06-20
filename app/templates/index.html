@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>YaliFX Marketplace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="YaliFX home">
+      <span class="brand-mark">Y</span>
+      <span>YaliFX</span>
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#market">Marketplace</a>
+      <a href="#studio">Creator Studio</a>
+      <a href="#enterprise">Enterprise</a>
+    </nav>
+    <button class="cart-button" id="cartToggle" type="button">
+      Cart <span id="cartCount">0</span>
+    </button>
+  </header>
+
+  <main>
+    <section class="market-shell" id="market">
+      <aside class="filter-panel" aria-label="Asset filters">
+        <div class="filter-block">
+          <label for="searchInput">Search</label>
+          <input id="searchInput" type="search" placeholder="smoke, niagara, VDB">
+        </div>
+
+        <div class="filter-block">
+          <label for="categorySelect">Category</label>
+          <select id="categorySelect">
+            <option value="">All categories</option>
+            <option>Smoke</option>
+            <option>Fire</option>
+            <option>Explosion</option>
+            <option>Clouds</option>
+            <option>Magic</option>
+            <option>Dust</option>
+            <option>Energy</option>
+            <option>Fog</option>
+          </select>
+        </div>
+
+        <div class="filter-block">
+          <label for="formatSelect">Format</label>
+          <select id="formatSelect">
+            <option value="">All formats</option>
+            <option>VDB</option>
+            <option>Unreal Niagara</option>
+            <option>Unity VFX Graph</option>
+            <option>Alembic Cache</option>
+            <option>Houdini HDA</option>
+          </select>
+        </div>
+
+        <div class="filter-block">
+          <label for="engineSelect">Engine</label>
+          <select id="engineSelect">
+            <option value="">All engines</option>
+            <option>Houdini</option>
+            <option>Unreal Engine</option>
+            <option>Unity</option>
+            <option>Blender</option>
+            <option>Cinema 4D</option>
+          </select>
+        </div>
+
+        <div class="filter-block">
+          <label for="sortSelect">Sort</label>
+          <select id="sortSelect">
+            <option value="featured">Featured</option>
+            <option value="popular">Popular</option>
+            <option value="rating">Rating</option>
+            <option value="newest">Newest</option>
+            <option value="price_asc">Price low to high</option>
+            <option value="price_desc">Price high to low</option>
+          </select>
+        </div>
+
+        <label class="check-row">
+          <input id="curatedOnly" type="checkbox">
+          <span>Curated only</span>
+        </label>
+
+        <button class="secondary-action" id="resetFilters" type="button">Reset</button>
+      </aside>
+
+      <section class="market-board" aria-live="polite">
+        <div class="board-head">
+          <div>
+            <p class="eyebrow">3D-first FX assets</p>
+            <h1>Production FX Marketplace</h1>
+          </div>
+          <div class="stats-strip" aria-label="Marketplace stats">
+            <div><strong id="assetCount">0</strong><span>Assets</span></div>
+            <div><strong>20%</strong><span>Commission</span></div>
+            <div><strong>10%</strong><span>Curated</span></div>
+          </div>
+        </div>
+        <div class="asset-grid" id="assetGrid"></div>
+      </section>
+
+      <aside class="detail-panel" id="detailPanel" aria-label="Selected asset">
+        <div class="empty-state">
+          <span class="empty-mark">FX</span>
+          <h2>Select an asset</h2>
+          <p>Details, creator data, license, and checkout controls appear here.</p>
+        </div>
+      </aside>
+    </section>
+
+    <section class="studio-band" id="studio">
+      <div class="section-head">
+        <p class="eyebrow">Creator Studio</p>
+        <h2>Upload FX Asset</h2>
+      </div>
+      <form class="upload-form" id="uploadForm">
+        <label>Asset title<input name="title" required minlength="3" placeholder="Realtime muzzle smoke pack"></label>
+        <label>Creator name<input name="creator_name" required placeholder="Your studio name"></label>
+        <label>Category
+          <select name="category" required>
+            <option>Smoke</option>
+            <option>Fire</option>
+            <option>Explosion</option>
+            <option>Clouds</option>
+            <option>Magic</option>
+            <option>Dust</option>
+            <option>Energy</option>
+            <option>Fog</option>
+          </select>
+        </label>
+        <label>Format
+          <select name="format" required>
+            <option>VDB</option>
+            <option>Unreal Niagara</option>
+            <option>Unity VFX Graph</option>
+            <option>Alembic Cache</option>
+            <option>Houdini HDA</option>
+          </select>
+        </label>
+        <label>Engine
+          <select name="engine" required>
+            <option>Houdini</option>
+            <option>Unreal Engine</option>
+            <option>Unity</option>
+            <option>Blender</option>
+            <option>Cinema 4D</option>
+          </select>
+        </label>
+        <label>Price USD<input name="price" required type="number" min="0" max="2500" value="49"></label>
+        <label class="span-2">Description<textarea name="description" required minlength="20" rows="4" placeholder="Pipeline notes, format details, included caches, render usage"></textarea></label>
+        <label>Tags<input name="tags" placeholder="vdb, smoke, game"></label>
+        <button class="primary-action" type="submit">Publish asset</button>
+      </form>
+      <p class="form-status" id="uploadStatus" role="status"></p>
+    </section>
+
+    <section class="business-band" id="enterprise">
+      <div class="plans-panel">
+        <div class="section-head">
+          <p class="eyebrow">Studios</p>
+          <h2>Plans</h2>
+        </div>
+        <div class="plan-grid" id="planGrid"></div>
+      </div>
+
+      <form class="enterprise-form" id="enterpriseForm">
+        <div class="section-head compact">
+          <p class="eyebrow">Enterprise</p>
+          <h2>Licensing Inquiry</h2>
+        </div>
+        <label>Name<input name="contact_name" required></label>
+        <label>Email<input name="email" type="email" required></label>
+        <label>Company<input name="company" required></label>
+        <label>Use case
+          <select name="use_case" required>
+            <option>Game Studio</option>
+            <option>Film Studio</option>
+            <option>Virtual Production</option>
+            <option>AR/VR</option>
+          </select>
+        </label>
+        <label>Seats<input name="seats" type="number" min="1" value="12"></label>
+        <label class="span-2">Message<textarea name="message" rows="4"></textarea></label>
+        <button class="primary-action" type="submit">Send inquiry</button>
+        <p class="form-status" id="enterpriseStatus" role="status"></p>
+      </form>
+    </section>
+  </main>
+
+  <aside class="cart-drawer" id="cartDrawer" aria-label="Cart" aria-hidden="true">
+    <div class="drawer-head">
+      <h2>Cart</h2>
+      <button class="icon-action" id="cartClose" type="button" aria-label="Close cart">x</button>
+    </div>
+    <div id="cartItems" class="cart-items"></div>
+    <form class="checkout-form" id="checkoutForm">
+      <label>Email<input name="buyer_email" type="email" required placeholder="producer@studio.com"></label>
+      <label>Studio<input name="buyer_studio" required value="Independent Studio"></label>
+      <label>Plan
+        <select name="plan">
+          <option value="single_purchase">Single purchase</option>
+          <option value="studio_monthly">Studio monthly</option>
+          <option value="studio_annual">Studio annual</option>
+        </select>
+      </label>
+      <div class="cart-total">
+        <span>Total</span>
+        <strong id="cartTotal">$0</strong>
+      </div>
+      <button class="primary-action" type="submit">Checkout</button>
+    </form>
+    <div class="receipt" id="receipt"></div>
+  </aside>
+</body>
+</html>
+
