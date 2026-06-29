@@ -95,3 +95,69 @@ def test_enterprise_inquiry(client: TestClient) -> None:
     ))
     assert response.status_code == 201
     assert response.json()["company"] == "Indie Volume Works"
+
+
+def test_seed_db_assigns_unique_slugs_for_duplicate_titles(monkeypatch: pytest.MonkeyPatch) -> None:
+    from app import models
+    from app import seed as seed_module
+    from app.database import SessionLocal
+
+    creator_data: list[dict[str, Any]] = [{"name": "Seed Creator", "studio_type": "Test", "location": "Remote", "bio": "", "rating": 4.8}]
+    asset_data: list[dict[str, Any]] = [
+            {
+                "title": "Duplicate Title",
+                "description": "First duplicate asset",
+                "category": "Smoke",
+                "format": "VDB",
+                "engine": "Houdini",
+                "license_type": "Commercial",
+                "price_cents": 1000,
+                "preview_url": "/static/media/community-upload.png",
+                "file_size_mb": 10,
+                "frames": 1,
+                "resolution": "1 voxel",
+                "curated": False,
+                "featured": False,
+                "tags": ["first"],
+                "sales_count": 0,
+                "rating": 4.7,
+                "creator": "Seed Creator",
+            },
+            {
+                "title": "Duplicate Title",
+                "description": "Second duplicate asset",
+                "category": "Fire",
+                "format": "VDB",
+                "engine": "Houdini",
+                "license_type": "Commercial",
+                "price_cents": 1500,
+                "preview_url": "/static/media/community-upload.png",
+                "file_size_mb": 12,
+                "frames": 2,
+                "resolution": "2 voxel",
+                "curated": False,
+                "featured": False,
+                "tags": ["second"],
+                "sales_count": 0,
+                "rating": 4.8,
+                "creator": "Seed Creator",
+            },
+        ]
+
+    monkeypatch.setattr(seed_module, "CREATOR_DATA", creator_data)
+    monkeypatch.setattr(seed_module, "ASSET_DATA", asset_data)
+
+    db = SessionLocal()
+    try:
+        db.query(models.OrderItem).delete(synchronize_session=False)
+        db.query(models.Order).delete(synchronize_session=False)
+        db.query(models.Asset).delete(synchronize_session=False)
+        db.query(models.Creator).delete(synchronize_session=False)
+        db.commit()
+
+        seed_module.seed_db(db)
+        db.expire_all()
+        slugs = [asset.slug for asset in db.query(models.Asset).all()]
+        assert len(slugs) == len(set(slugs))
+    finally:
+        db.close()
