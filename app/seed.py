@@ -3,7 +3,7 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from . import models
-from .services import clean_tags, slugify
+from .services import clean_tags, slugify, unique_slug
 
 
 CREATOR_DATA: list[dict[str, Any]] = [
@@ -203,12 +203,17 @@ def seed_db(db: Session) -> None:
         asset_data: dict[str, Any] = dict(item)
         creator_name: str = asset_data.pop("creator")
         tags: list[str] = asset_data.pop("tags")
+        base_slug = slugify(asset_data["title"])
+        slug = unique_slug(db, asset_data["title"])
+        while db.query(models.Asset).filter(models.Asset.slug == slug).first():
+            slug = f"{base_slug}-{len(db.query(models.Asset).all()) + 1}"
         asset = models.Asset(
             **asset_data,
-            slug=slugify(asset_data["title"]),
+            slug=slug,
             tags_text=clean_tags(tags),
             creator=creators[creator_name],
         )
         db.add(asset)
 
     db.commit()
+
