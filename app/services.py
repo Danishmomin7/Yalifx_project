@@ -98,6 +98,8 @@ def asset_to_dict(asset: models.Asset) -> dict[str, Any]:
         "license_type": asset.license_type,
         "price_cents": asset.price_cents,
         "preview_url": asset.preview_url,
+        "gdrive_preview_link": asset.gdrive_preview_link,
+        "gdrive_source_link": asset.gdrive_source_link,
         "file_size_mb": asset.file_size_mb,
         "version": asset.version,
         "frames": asset.frames,
