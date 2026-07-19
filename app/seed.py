@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, List, Dict
 
 from sqlalchemy.orm import Session
 
@@ -6,7 +6,7 @@ from . import models
 from .services import clean_tags, slugify, unique_slug
 
 
-CREATOR_DATA: list[dict[str, Any]] = [
+CREATOR_DATA: List[Dict[str, Any]] = [
     {
         "name": "YaliFX Curated",
         "studio_type": "YaliFX Quality Desk",
@@ -31,7 +31,7 @@ CREATOR_DATA: list[dict[str, Any]] = [
 ]
 
 
-ASSET_DATA: list[dict[str, Any]] = [
+ASSET_DATA: List[Dict[str, Any]] = [
     {
         "title": "Hero Smoke Column VDB",
         "description": "High-resolution hero smoke column with layered density, soft turbulence, and clean alpha falloff for compositing or Houdini relighting.",
@@ -101,8 +101,8 @@ ASSET_DATA: list[dict[str, Any]] = [
         "file_size_mb": 1800,
         "frames": 1,
         "resolution": "896 voxel",
-        "curated": True,
-        "featured": False,
+                "curated": True,
+                "featured": False,
         "tags": ["cloud", "vdb", "sky", "volume"],
         "sales_count": 73,
         "rating": 4.78,
@@ -216,4 +216,3 @@ def seed_db(db: Session) -> None:
         db.add(asset)
 
     db.commit()
-
