@@ -12,9 +12,9 @@
 </head>
 <body>
   <header class="topbar">
-   <a class="brand" href="/" aria-label="YaliFX home">
-      <img src="/static/media/yalifx_logo-images-1.jpg" alt="YaliFX Logo" style="height: 40px; object-fit: contain;">
-      <span>YaliFX</span>
+    <a class="brand" href="/" aria-label="YaliFX home">
+      <img class="brand-logo" src="/static/media/yalifx-logo.jpg" alt="YaliFX logo" style="width: 44px; height: 44px; object-fit: contain;">
+      <span class="brand-text">YaliFX</span>
     </a>
     <nav class="nav-links" aria-label="Primary">
       <a href="#market">Marketplace</a>
@@ -158,6 +158,8 @@
         <label>Price USD<input name="price" required type="number" min="0" max="2500" value="49"></label>
         <label class="span-2">Description<textarea name="description" required minlength="20" rows="4" placeholder="Pipeline notes, format details, included caches, render usage"></textarea></label>
         <label>Tags<input name="tags" placeholder="vdb, smoke, game"></label>
+        <label>Preview link<input name="gdrive_preview_link" type="url" placeholder="Paste Google Drive .mov Link"></label>
+        <label>Source link<input name="gdrive_source_link" type="url" placeholder="Paste Google Drive .vdb/.zip Link"></label>
         <button class="primary-action" type="submit">Publish asset</button>
       </form>
       <p class="form-status" id="uploadStatus" role="status"></p>
@@ -222,4 +224,3 @@
   </aside>
 </body>
 </html>
-
