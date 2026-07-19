@@ -21,6 +21,8 @@ class AssetPublic(BaseModel):
     license_type: str
     price_cents: int
     preview_url: str
+    gdrive_preview_link: str | None
+    gdrive_source_link: str | None
     file_size_mb: int
     version: str
     frames: int
@@ -50,6 +52,8 @@ class AssetCreate(BaseModel):
     creator_type: str = Field(default="Freelance FX Artist", max_length=80)
     creator_location: str = Field(default="Remote", max_length=120)
     preview_url: str | None = Field(default=None, max_length=240)
+    gdrive_preview_link: str | None = Field(default=None, max_length=500)
+    gdrive_source_link: str | None = Field(default=None, max_length=500)
 
 
 class CheckoutItem(BaseModel):
