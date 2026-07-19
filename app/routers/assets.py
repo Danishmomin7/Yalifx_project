@@ -1,3 +1,5 @@
+import re
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
@@ -14,6 +16,34 @@ from ..services import (
 
 
 router = APIRouter(prefix="/api/assets", tags=["assets"])
+
+
+def convert_gdrive_preview(url: str | None) -> str | None:
+    """Converts a standard Drive link to an iframe-friendly preview link."""
+    if not url:
+        return None
+
+    match = re.search(r"/d/([a-zA-Z0-9_-]+)", url)
+    if not match:
+        match = re.search(r"[?&]id=([a-zA-Z0-9_-]+)", url)
+    if match:
+        return f"https://drive.google.com/file/d/{match.group(1)}/preview"
+
+    return url
+
+
+def convert_gdrive_source(url: str | None) -> str | None:
+    """Converts a standard Drive link to a direct download link."""
+    if not url:
+        return None
+
+    match = re.search(r"/d/([a-zA-Z0-9_-]+)", url)
+    if not match:
+        match = re.search(r"[?&]id=([a-zA-Z0-9_-]+)", url)
+    if match:
+        return f"https://drive.google.com/uc?export=download&id={match.group(1)}"
+
+    return url
 
 
 @router.get("", response_model=list[AssetPublic])
@@ -103,6 +133,8 @@ def create_asset(payload: AssetCreate, db: Session = Depends(get_db)):
         license_type=payload.license_type,
         price_cents=payload.price_cents,
         preview_url=payload.preview_url or "/static/media/community-upload.png",
+        gdrive_preview_link=convert_gdrive_preview(payload.gdrive_preview_link),
+        gdrive_source_link=convert_gdrive_source(payload.gdrive_source_link),
         file_size_mb=payload.file_size_mb,
         version=payload.version,
         frames=payload.frames,
@@ -116,4 +148,3 @@ def create_asset(payload: AssetCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(asset)
     return asset_to_dict(asset)
-
