@@ -104,9 +104,18 @@ function selectAsset(slug) {
 }
 
 function renderDetail(asset) {
+  console.log("Render asset preview:", asset.slug, asset.gdrive_preview_link);
+  const media = asset.gdrive_preview_link
+    ? `<iframe src="${asset.gdrive_preview_link}" width="100%" height="480" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen style="border:none; border-radius: 8px;" title="${asset.title} preview"></iframe>`
+    : `<img src="${asset.preview_url}" alt="${asset.title} large preview">`;
+  const downloadLink = asset.gdrive_source_link || "#";
+  const downloadState = asset.gdrive_source_link
+    ? ""
+    : ' aria-disabled="true" tabindex="-1"';
+
   $("#detailPanel").innerHTML = `
     <div class="detail-media">
-      <img src="${asset.preview_url}" alt="${asset.title} large preview">
+      ${media}
     </div>
     <div class="detail-content">
       <div>
@@ -122,7 +131,10 @@ function renderDetail(asset) {
         <div><span>Size</span><strong>${asset.file_size_mb} MB</strong></div>
         <div><span>Version</span><strong>${asset.version}</strong></div>
       </div>
-      <button class="primary-action" type="button" id="addSelected">Add ${money(asset.price_cents)}</button>
+      <div class="detail-actions">
+        <button class="primary-action" type="button" id="addSelected">Add ${money(asset.price_cents)}</button>
+        <a class="secondary-action download-action${asset.gdrive_source_link ? "" : " disabled"}" href="${downloadLink}" target="_blank" rel="noopener"${downloadState}>Download</a>
+      </div>
     </div>
   `;
   $("#addSelected").addEventListener("click", () => addToCart(asset.slug));
@@ -205,7 +217,11 @@ async function checkout(event) {
 
 async function uploadAsset(event) {
   event.preventDefault();
-  const form = new FormData(event.currentTarget);
+  const formEl =
+    event.currentTarget ||
+    event.target?.closest("form") ||
+    document.getElementById("uploadForm");
+  const form = new FormData(formEl);
   const payload = {
     title: form.get("title"),
     creator_name: form.get("creator_name"),
@@ -214,6 +230,8 @@ async function uploadAsset(event) {
     engine: form.get("engine"),
     price_cents: Math.round(Number(form.get("price")) * 100),
     description: form.get("description"),
+    gdrive_preview_link: form.get("gdrive_preview_link"),
+    gdrive_source_link: form.get("gdrive_source_link"),
     tags: String(form.get("tags") || "")
       .split(",")
       .map((tag) => tag.trim())
@@ -222,7 +240,9 @@ async function uploadAsset(event) {
   try {
     const asset = await api("/api/assets", { method: "POST", body: JSON.stringify(payload) });
     $("#uploadStatus").textContent = `${asset.title} published.`;
-    event.currentTarget.reset();
+    if (formEl && typeof formEl.reset === "function") {
+      formEl.reset();
+    }
     await loadAssets();
     selectAsset(asset.slug);
   } catch (error) {
@@ -247,7 +267,8 @@ async function loadPlans() {
 
 async function sendEnterpriseInquiry(event) {
   event.preventDefault();
-  const form = new FormData(event.currentTarget);
+  const formEl = event.currentTarget || event.target?.closest("form");
+  const form = new FormData(formEl);
   const payload = Object.fromEntries(form.entries());
   payload.seats = Number(payload.seats || 1);
   try {
@@ -256,7 +277,9 @@ async function sendEnterpriseInquiry(event) {
       body: JSON.stringify(payload),
     });
     $("#enterpriseStatus").textContent = `Inquiry #${inquiry.id} received.`;
-    event.currentTarget.reset();
+    if (formEl && typeof formEl.reset === "function") {
+      formEl.reset();
+    }
   } catch (error) {
     $("#enterpriseStatus").textContent = error.message;
   }
@@ -281,4 +304,3 @@ $("#enterpriseForm").addEventListener("submit", sendEnterpriseInquiry);
 renderCart();
 loadPlans();
 loadAssets();
-
