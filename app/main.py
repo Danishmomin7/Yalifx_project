@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from .database import SessionLocal, init_db
-from .routers import assets, business, creators, orders
+from .routers import assets, business, creators, orders, search
 from .seed import seed_db
 
 
@@ -48,6 +48,7 @@ app.include_router(assets.router)
 app.include_router(orders.router)
 app.include_router(creators.router)
 app.include_router(business.router)
+app.include_router(search.router)
 
 
 @app.get("/", response_class=HTMLResponse)

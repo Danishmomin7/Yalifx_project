@@ -8,12 +8,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/styles.css">
+  <link rel="icon" type="image/png" href="/static/media/Yaali_FX_final_logo__2_-images-1-removebg-preview.png">
   <script src="/static/app.js" defer></script>
 </head>
 <body>
   <header class="topbar">
     <a class="brand" href="/" aria-label="YaliFX home">
-      <img class="brand-logo" src="/static/media/yalifx-logo.jpg" alt="YaliFX logo" style="width: 44px; height: 44px; object-fit: contain;">
+      <img class="brand-logo" src="/static/media/Yaali_FX_final_logo__2_-images-0-removebg-preview.png" alt="YaliFX logo">
       <span class="brand-text">YaliFX</span>
     </a>
     <nav class="nav-links" aria-label="Primary">
@@ -28,71 +29,6 @@
 
   <main>
     <section class="market-shell" id="market">
-      <aside class="filter-panel" aria-label="Asset filters">
-        <div class="filter-block">
-          <label for="searchInput">Search</label>
-          <input id="searchInput" type="search" placeholder="smoke, niagara, VDB">
-        </div>
-
-        <div class="filter-block">
-          <label for="categorySelect">Category</label>
-          <select id="categorySelect">
-            <option value="">All categories</option>
-            <option>Smoke</option>
-            <option>Fire</option>
-            <option>Explosion</option>
-            <option>Clouds</option>
-            <option>Magic</option>
-            <option>Dust</option>
-            <option>Energy</option>
-            <option>Fog</option>
-          </select>
-        </div>
-
-        <div class="filter-block">
-          <label for="formatSelect">Format</label>
-          <select id="formatSelect">
-            <option value="">All formats</option>
-            <option>VDB</option>
-            <option>Unreal Niagara</option>
-            <option>Unity VFX Graph</option>
-            <option>Alembic Cache</option>
-            <option>Houdini HDA</option>
-          </select>
-        </div>
-
-        <div class="filter-block">
-          <label for="engineSelect">Engine</label>
-          <select id="engineSelect">
-            <option value="">All engines</option>
-            <option>Houdini</option>
-            <option>Unreal Engine</option>
-            <option>Unity</option>
-            <option>Blender</option>
-            <option>Cinema 4D</option>
-          </select>
-        </div>
-
-        <div class="filter-block">
-          <label for="sortSelect">Sort</label>
-          <select id="sortSelect">
-            <option value="featured">Featured</option>
-            <option value="popular">Popular</option>
-            <option value="rating">Rating</option>
-            <option value="newest">Newest</option>
-            <option value="price_asc">Price low to high</option>
-            <option value="price_desc">Price high to low</option>
-          </select>
-        </div>
-
-        <label class="check-row">
-          <input id="curatedOnly" type="checkbox">
-          <span>Curated only</span>
-        </label>
-
-        <button class="secondary-action" id="resetFilters" type="button">Reset</button>
-      </aside>
-
       <section class="market-board" aria-live="polite">
         <div class="board-head">
           <div>
@@ -105,6 +41,72 @@
             <div><strong>10%</strong><span>Curated</span></div>
           </div>
         </div>
+
+        <div class="toolbar-strip" aria-label="Asset filters">
+          <div class="filter-block search-block">
+            <label for="searchInput">Search</label>
+            <input id="searchInput" type="search" placeholder="smoke, niagara, VDB">
+          </div>
+
+          <div class="filter-block compact-filter">
+            <label for="categorySelect">Category</label>
+            <select id="categorySelect">
+              <option value="">All categories</option>
+              <option>Smoke</option>
+              <option>Fire</option>
+              <option>Explosion</option>
+              <option>Clouds</option>
+              <option>Magic</option>
+              <option>Dust</option>
+              <option>Energy</option>
+              <option>Fog</option>
+            </select>
+          </div>
+
+          <div class="filter-block compact-filter">
+            <label for="formatSelect">Format</label>
+            <select id="formatSelect">
+              <option value="">All formats</option>
+              <option>VDB</option>
+              <option>Unreal Niagara</option>
+              <option>Unity VFX Graph</option>
+              <option>Alembic Cache</option>
+              <option>Houdini HDA</option>
+            </select>
+          </div>
+
+          <div class="filter-block compact-filter">
+            <label for="engineSelect">Engine</label>
+            <select id="engineSelect">
+              <option value="">All engines</option>
+              <option>Houdini</option>
+              <option>Unreal Engine</option>
+              <option>Unity</option>
+              <option>Blender</option>
+              <option>Cinema 4D</option>
+            </select>
+          </div>
+
+          <div class="filter-block compact-filter">
+            <label for="sortSelect">Sort</label>
+            <select id="sortSelect">
+              <option value="featured">Featured</option>
+              <option value="popular">Popular</option>
+              <option value="rating">Rating</option>
+              <option value="newest">Newest</option>
+              <option value="price_asc">Price low to high</option>
+              <option value="price_desc">Price high to low</option>
+            </select>
+          </div>
+
+          <label class="check-row compact-check">
+            <input id="curatedOnly" type="checkbox">
+            <span>Curated only</span>
+          </label>
+
+          <button class="secondary-action" id="resetFilters" type="button">Reset</button>
+        </div>
+
         <div class="asset-grid" id="assetGrid"></div>
       </section>
 
@@ -158,8 +160,24 @@
         <label>Price USD<input name="price" required type="number" min="0" max="2500" value="49"></label>
         <label class="span-2">Description<textarea name="description" required minlength="20" rows="4" placeholder="Pipeline notes, format details, included caches, render usage"></textarea></label>
         <label>Tags<input name="tags" placeholder="vdb, smoke, game"></label>
-        <label>Preview link<input name="gdrive_preview_link" type="url" placeholder="Paste Google Drive .mov Link"></label>
-        <label>Source link<input name="gdrive_source_link" type="url" placeholder="Paste Google Drive .vdb/.zip Link"></label>
+          <div class="file-field">
+            <span class="field-label">Preview file</span>
+            <label class="file-dropzone" for="previewFile">
+              <input id="previewFile" name="preview_file" type="file" accept=".mov,.mp4,video/quicktime,video/mp4" required>
+              <strong>Drop a preview video here</strong>
+              <span class="file-hint">MOV or MP4</span>
+              <span class="file-name" id="previewFileName">No file selected</span>
+            </label>
+          </div>
+          <div class="file-field">
+            <span class="field-label">Source file</span>
+            <label class="file-dropzone" for="sourceFile">
+              <input id="sourceFile" name="source_file" type="file" accept=".vdb,.zip,application/zip,application/octet-stream" required>
+              <strong>Drop a source archive here</strong>
+              <span class="file-hint">VDB or ZIP</span>
+              <span class="file-name" id="sourceFileName">No file selected</span>
+            </label>
+          </div>
         <button class="primary-action" type="submit">Publish asset</button>
       </form>
       <p class="form-status" id="uploadStatus" role="status"></p>

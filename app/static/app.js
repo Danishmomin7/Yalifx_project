@@ -19,8 +19,9 @@ const filters = {
 };
 
 async function api(path, options = {}) {
+  const isFormData = options.body instanceof FormData;
   const response = await fetch(path, {
-    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+    headers: isFormData ? { ...(options.headers || {}) } : { "Content-Type": "application/json", ...(options.headers || {}) },
     ...options,
   });
   if (!response.ok) {
@@ -39,6 +40,35 @@ function queryString() {
   if (filters.curated.checked) params.set("curated", "true");
   params.set("sort", filters.sort.value);
   return params.toString();
+}
+
+async function fetchSearchResults(query) {
+  if (!query.trim()) {
+    await loadAssets();
+    return;
+  }
+
+  try {
+    const results = await api(`/api/search?q=${encodeURIComponent(query.trim())}`);
+    state.assets = results;
+    $("#assetCount").textContent = state.assets.length;
+    renderAssets();
+    if (!state.selected && state.assets.length) {
+      selectAsset(state.assets[0].slug);
+    } else if (state.selected) {
+      const exists = state.assets.find((asset) => asset.slug === state.selected.slug);
+      if (!exists && state.assets.length) selectAsset(state.assets[0].slug);
+    }
+  } catch (error) {
+    $("#assetGrid").innerHTML = `<div class="empty-grid">${error.message}</div>`;
+    $("#detailPanel").innerHTML = `
+      <div class="empty-state">
+        <span class="empty-mark">FX</span>
+        <h2>No search results</h2>
+        <p>${error.message}</p>
+      </div>
+    `;
+  }
 }
 
 async function loadAssets() {
@@ -61,13 +91,20 @@ function renderAssets() {
     return;
   }
 
+  const previewMarkup = (asset) => {
+    if (/\.(mov|mp4)(?:$|[?#])/i.test(asset.preview_url)) {
+      return `<video src="${asset.preview_url}" muted loop playsinline preload="metadata"></video>`;
+    }
+    return `<img src="${asset.preview_url}" alt="${asset.title} preview">`;
+  };
+
   grid.innerHTML = state.assets
     .map(
       (asset) => `
       <article class="asset-card">
         <button type="button" data-select="${asset.slug}">
           <div class="thumb">
-            <img src="${asset.preview_url}" alt="${asset.title} preview">
+            ${previewMarkup(asset)}
             <div class="badge-row">
               ${asset.curated ? '<span class="badge curated">Curated</span>' : ""}
               ${asset.featured ? '<span class="badge">Featured</span>' : ""}
@@ -104,12 +141,9 @@ function selectAsset(slug) {
 }
 
 function renderDetail(asset) {
-  console.log("Render asset preview:", asset.slug, asset.gdrive_preview_link);
-  const media = asset.gdrive_preview_link
-    ? `<iframe src="${asset.gdrive_preview_link}" width="100%" height="480" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen style="border:none; border-radius: 8px;" title="${asset.title} preview"></iframe>`
-    : `<img src="${asset.preview_url}" alt="${asset.title} large preview">`;
-  const downloadLink = asset.gdrive_source_link || "#";
-  const downloadState = asset.gdrive_source_link
+  const media = `<iframe src="${asset.preview_route}" width="100%" height="480" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen style="border:none; border-radius: 8px;" title="${asset.title} preview"></iframe>`;
+  const downloadRoute = asset.download_route || "#";
+  const downloadState = asset.download_route
     ? ""
     : ' aria-disabled="true" tabindex="-1"';
 
@@ -133,7 +167,7 @@ function renderDetail(asset) {
       </div>
       <div class="detail-actions">
         <button class="primary-action" type="button" id="addSelected">Add ${money(asset.price_cents)}</button>
-        <a class="secondary-action download-action${asset.gdrive_source_link ? "" : " disabled"}" href="${downloadLink}" target="_blank" rel="noopener"${downloadState}>Download</a>
+        <a class="secondary-action download-action${asset.download_route ? "" : " disabled"}" href="${downloadRoute}" target="_blank" rel="noopener"${downloadState}>Download</a>
       </div>
     </div>
   `;
@@ -222,32 +256,73 @@ async function uploadAsset(event) {
     event.target?.closest("form") ||
     document.getElementById("uploadForm");
   const form = new FormData(formEl);
-  const payload = {
-    title: form.get("title"),
-    creator_name: form.get("creator_name"),
-    category: form.get("category"),
-    format: form.get("format"),
-    engine: form.get("engine"),
-    price_cents: Math.round(Number(form.get("price")) * 100),
-    description: form.get("description"),
-    gdrive_preview_link: form.get("gdrive_preview_link"),
-    gdrive_source_link: form.get("gdrive_source_link"),
-    tags: String(form.get("tags") || "")
-      .split(",")
-      .map((tag) => tag.trim())
-      .filter(Boolean),
-  };
+  const tags = String(form.get("tags") || "")
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+  form.set("price_cents", String(Math.round(Number(form.get("price")) * 100)));
+  form.set("tags", JSON.stringify(tags));
   try {
-    const asset = await api("/api/assets", { method: "POST", body: JSON.stringify(payload) });
+    const asset = await api("/api/assets/upload", { method: "POST", body: form });
     $("#uploadStatus").textContent = `${asset.title} published.`;
     if (formEl && typeof formEl.reset === "function") {
       formEl.reset();
+      updateFileName($("#previewFile"));
+      updateFileName($("#sourceFile"));
     }
     await loadAssets();
     selectAsset(asset.slug);
   } catch (error) {
     $("#uploadStatus").textContent = error.message;
   }
+}
+
+function updateFileName(input) {
+  const target = document.getElementById(`${input.id}Name`);
+  target.textContent = input.files[0]?.name || "No file selected";
+}
+
+function hasExtension(file, extensions) {
+  return extensions.some((extension) => file.name.toLowerCase().endsWith(extension));
+}
+
+function setupFileDropzone(inputId, extensions) {
+  const input = document.getElementById(inputId);
+  const dropzone = input.closest(".file-dropzone");
+
+  const setFile = (file) => {
+    if (!hasExtension(file, extensions)) {
+      input.value = "";
+      updateFileName(input);
+      $("#uploadStatus").textContent = `Choose a ${extensions.join(" or ")} file.`;
+      return;
+    }
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    input.files = transfer.files;
+    updateFileName(input);
+    $("#uploadStatus").textContent = "";
+  };
+
+  input.addEventListener("change", () => {
+    if (input.files[0]) setFile(input.files[0]);
+  });
+  ["dragenter", "dragover"].forEach((eventName) =>
+    dropzone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      dropzone.classList.add("is-dragover");
+    })
+  );
+  ["dragleave", "drop"].forEach((eventName) =>
+    dropzone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      dropzone.classList.remove("is-dragover");
+    })
+  );
+  dropzone.addEventListener("drop", (event) => {
+    const [file] = event.dataTransfer.files;
+    if (file) setFile(file);
+  });
 }
 
 async function loadPlans() {
@@ -285,7 +360,15 @@ async function sendEnterpriseInquiry(event) {
   }
 }
 
-Object.values(filters).forEach((input) => input.addEventListener("input", loadAssets));
+Object.values(filters).forEach((input) => {
+  input.addEventListener("input", async () => {
+    if (filters.q === input) {
+      await fetchSearchResults(filters.q.value);
+      return;
+    }
+    await loadAssets();
+  });
+});
 $("#resetFilters").addEventListener("click", () => {
   filters.q.value = "";
   filters.category.value = "";
@@ -300,6 +383,8 @@ $("#cartClose").addEventListener("click", closeCart);
 $("#checkoutForm").addEventListener("submit", checkout);
 $("#uploadForm").addEventListener("submit", uploadAsset);
 $("#enterpriseForm").addEventListener("submit", sendEnterpriseInquiry);
+setupFileDropzone("previewFile", [".mov", ".mp4"]);
+setupFileDropzone("sourceFile", [".vdb", ".zip"]);
 
 renderCart();
 loadPlans();

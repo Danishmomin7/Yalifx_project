@@ -21,8 +21,8 @@ class AssetPublic(BaseModel):
     license_type: str
     price_cents: int
     preview_url: str
-    gdrive_preview_link: str | None
-    gdrive_source_link: str | None
+    preview_route: str
+    download_route: str
     file_size_mb: int
     version: str
     frames: int

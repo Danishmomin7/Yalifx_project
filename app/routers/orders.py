@@ -2,6 +2,7 @@ import secrets
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from .. import models
@@ -11,6 +12,24 @@ from ..services import calculate_commission, calculate_total, order_to_dict
 
 
 router = APIRouter(prefix="/api/orders", tags=["orders"])
+
+
+@router.get("/downloads/{download_token}/{slug}")
+def download_order_asset(download_token: str, slug: str, db: Session = Depends(get_db)):
+    order = db.query(models.Order).filter(models.Order.download_token == download_token).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Download link is invalid")
+
+    item = (
+        db.query(models.OrderItem)
+        .join(models.Asset, models.OrderItem.asset_id == models.Asset.id)
+        .filter(models.OrderItem.order_id == order.id, models.Asset.slug == slug)
+        .first()
+    )
+    if not item or not item.asset.gdrive_source_link:
+        raise HTTPException(status_code=404, detail="Asset download is not available")
+
+    return RedirectResponse(item.asset.gdrive_source_link, status_code=307)
 
 
 @router.post("", response_model=OrderPublic, status_code=status.HTTP_201_CREATED)

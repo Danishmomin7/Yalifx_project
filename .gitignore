@@ -1,4 +1,7 @@
 .venv/
+Include/
+Lib/
+Scripts/
 __pycache__/
 *.py[cod]
 *.db
@@ -8,4 +11,6 @@ __pycache__/
 .env
 dist/
 build/
+node_modules/
+.pyre_configuration
 
